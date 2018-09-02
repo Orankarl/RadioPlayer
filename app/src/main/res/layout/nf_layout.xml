@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+    <ImageView
+        android:id="@+id/music_thumbnail"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_music_default_24dp"/>
+
+    <ImageView
+        android:id="@+id/nf_close_btn"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:padding="8dp"
+        android:src="@drawable/ic_close_black_24dp"/>
+
+    <ImageView
+        android:id="@+id/nf_lyric_btn"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@id/nf_close_btn"
+        android:padding="4dp"
+        android:src="@drawable/ic_lyric_black_24dp"/>
+
+    <ImageView
+        android:id="@+id/nf_next_btn"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@id/nf_lyric_btn"
+        android:padding="4dp"
+        android:src="@drawable/ic_fast_forward_black_24dp"/>
+
+    <ImageView
+        android:id="@+id/nf_pause_btn"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@id/nf_next_btn"
+        android:padding="4dp"
+        android:src="@drawable/ic_pause_black_24dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_toLeftOf="@id/nf_pause_btn"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/music_thumbnail"
+        android:layout_marginLeft="2dp"
+        android:layout_marginRight="2dp"
+        android:id="@+id/music_name"
+        android:layout_centerVertical="true"
+        android:maxLines="2"/>
+
+</RelativeLayout>
