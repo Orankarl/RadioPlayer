@@ -1,16 +1,19 @@
 package com.inorin.orankarl.radioplayer.PlayMusic.view;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.support.constraint.ConstraintLayout;
@@ -37,6 +40,7 @@ import com.inorin.orankarl.radioplayer.LrcView;
 import com.inorin.orankarl.radioplayer.PlayMusic.presenter.PlayerPresenter;
 import com.inorin.orankarl.radioplayer.R;
 import com.inorin.orankarl.radioplayer.SingleLrcView;
+import com.inorin.orankarl.radioplayer.Utils.BilibiliUtil;
 import com.inorin.orankarl.radioplayer.Utils.PlayUtil;
 
 import java.lang.ref.WeakReference;
@@ -68,6 +72,20 @@ public class PlayActivity extends AppCompatActivity implements IPlayerView {
         playOrPause(button);
 
         playerPresenter.start();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && this.checkSelfPermission(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+            this.requestPermissions(new String[]{
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+            }, 1);
+
+        }
+
+        BilibiliUtil util = new BilibiliUtil();
+        util.init(6509075);
+
     }
 
     private void initLrcLayout() {
