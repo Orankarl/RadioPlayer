@@ -84,7 +84,7 @@ public class PlayActivity extends AppCompatActivity implements IPlayerView {
         }
 
         BilibiliUtil util = new BilibiliUtil();
-        util.init(6509075);
+        util.init(6509075, this);
 
     }
 
