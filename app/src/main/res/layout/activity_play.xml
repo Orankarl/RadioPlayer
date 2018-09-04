@@ -47,10 +47,26 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
             <LinearLayout
-                app:layout_constraintBottom_toBottomOf="parent"
-                android:orientation="horizontal"
+                app:layout_constraintBottom_toTopOf="@id/lrc_single_view_layout"
+                app:layout_constraintTop_toTopOf="parent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/lrc_single_view_layout"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <master.flame.danmaku.ui.widget.DanmakuView
+                    app:layout_constraintBottom_toTopOf="@id/lrc_single_view_layout"
+                    android:id="@+id/danmaku_view"
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp" />
                 <com.inorin.orankarl.radioplayer.SingleLrcView
                     android:id="@+id/lrc_single_view"
                     android:layout_width="match_parent"

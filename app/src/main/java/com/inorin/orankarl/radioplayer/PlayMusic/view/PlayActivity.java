@@ -42,10 +42,28 @@ import com.inorin.orankarl.radioplayer.R;
 import com.inorin.orankarl.radioplayer.SingleLrcView;
 import com.inorin.orankarl.radioplayer.Utils.BilibiliUtil;
 import com.inorin.orankarl.radioplayer.Utils.PlayUtil;
+import com.sample.BiliDanmukuParser;
 
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+
+import master.flame.danmaku.danmaku.loader.ILoader;
+import master.flame.danmaku.danmaku.loader.IllegalDataException;
+import master.flame.danmaku.danmaku.loader.android.DanmakuLoaderFactory;
+import master.flame.danmaku.danmaku.model.BaseDanmaku;
+import master.flame.danmaku.danmaku.model.DanmakuTimer;
+import master.flame.danmaku.danmaku.model.IDisplayer;
+import master.flame.danmaku.danmaku.model.android.BaseCacheStuffer;
+import master.flame.danmaku.danmaku.model.android.DanmakuContext;
+import master.flame.danmaku.danmaku.model.android.Danmakus;
+import master.flame.danmaku.danmaku.model.android.SimpleTextCacheStuffer;
+import master.flame.danmaku.danmaku.model.android.SpannedCacheStuffer;
+import master.flame.danmaku.danmaku.parser.BaseDanmakuParser;
+import master.flame.danmaku.danmaku.parser.IDataSource;
+import master.flame.danmaku.ui.widget.DanmakuView;
 
 public class PlayActivity extends AppCompatActivity implements IPlayerView {
 
@@ -59,6 +77,11 @@ public class PlayActivity extends AppCompatActivity implements IPlayerView {
     private PlayerPresenter playerPresenter = new PlayerPresenter(this);
     private android.support.v7.widget.Toolbar toolbar;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("mm:ss");
+    private DanmakuView danmakuView;
+    private DanmakuContext danmakuContext;
+    private HashMap<Integer, Integer> maxLinesPair;// 弹幕最大行数
+    private HashMap<Integer, Boolean> overlappingEnablePair;// 设置是否重叠
+    private BaseDanmakuParser parser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,8 +91,11 @@ public class PlayActivity extends AppCompatActivity implements IPlayerView {
 
         initLrcLayout();
         initView();
+        if (getIntent().getBooleanExtra("isFirst", false)) {
+            playOrPause(button);
+        }
 
-        playOrPause(button);
+        initDanmakuView();
 
         playerPresenter.start();
 
@@ -85,6 +111,105 @@ public class PlayActivity extends AppCompatActivity implements IPlayerView {
 
         BilibiliUtil util = new BilibiliUtil();
         util.init(6509075, this);
+
+    }
+
+    private void initDanmakuView() {
+        danmakuView = findViewById(R.id.danmaku_view);
+        danmakuContext = DanmakuContext.create();
+
+        // 设置最大行数,从右向左滚动(有其它方向可选)
+        maxLinesPair=new HashMap<>();
+        maxLinesPair.put(BaseDanmaku.TYPE_SCROLL_RL,3);
+
+        // 设置是否禁止重叠
+        overlappingEnablePair = new HashMap<>();
+        overlappingEnablePair.put(BaseDanmaku.TYPE_SCROLL_LR, true);
+        overlappingEnablePair.put(BaseDanmaku.TYPE_FIX_BOTTOM, true);
+
+
+
+        danmakuContext.setDanmakuStyle(IDisplayer.DANMAKU_STYLE_STROKEN, 3) //设置描边样式
+                .setDuplicateMergingEnabled(false)
+                .setScrollSpeedFactor(1.2f) //是否启用合并重复弹幕
+                .setScaleTextSize(1.2f) //设置弹幕滚动速度系数,只对滚动弹幕有效
+                .setCacheStuffer(new SimpleTextCacheStuffer(), new BaseCacheStuffer.Proxy() {
+                    @Override
+                    public void prepareDrawing(BaseDanmaku danmaku, boolean fromWorkerThread) {
+
+                    }
+
+                    @Override
+                    public void releaseResource(BaseDanmaku danmaku) {
+
+                    }
+                })
+//                .setCacheStuffer(new SpannedCacheStuffer(), mCacheStufferAdapter) // 图文混排使用SpannedCacheStuffer  设置缓存绘制填充器，
+                // 默认使用{@link SimpleTextCacheStuffer}只支持纯文字显示,
+                // 如果需要图文混排请设置{@link SpannedCacheStuffer}
+                // 如果需要定制其他样式请扩展{@link SimpleTextCacheStuffer}|{@link SpannedCacheStuffer}
+                .setMaximumLines(maxLinesPair) //设置最大显示行数
+                .preventOverlapping(overlappingEnablePair); //设置防弹幕重叠，null为允许重叠
+
+
+        if (danmakuView != null) {
+            parser = createParser(this.getResources().openRawResource(R.raw.comment)); //创建解析器对象，从raw资源目录下解析comments.xml文本
+            danmakuView.setCallback(new master.flame.danmaku.controller.DrawHandler.Callback() {
+                @Override
+                public void updateTimer(DanmakuTimer timer) {
+                }
+
+                @Override
+                public void drawingFinished() {
+
+                }
+
+                @Override
+                public void danmakuShown(BaseDanmaku danmaku) {
+
+                }
+
+                @Override
+                public void prepared() {
+                    danmakuView.start(PlayUtil.player.getCurrentPosition());
+                    if (PlayUtil.player != null && !PlayUtil.player.isPlaying()) {
+                        danmakuView.pause();
+                    }
+                }
+            });
+
+            danmakuView.prepare(parser, danmakuContext);
+            danmakuView.showFPS(false); //是否显示FPS
+            danmakuView.enableDanmakuDrawingCache(true);
+
+        }
+    }
+
+    private BaseDanmakuParser createParser(InputStream stream) {
+
+        if (stream == null) {
+            return new BaseDanmakuParser() {
+
+                @Override
+                protected Danmakus parse() {
+                    return new Danmakus();
+                }
+            };
+        }
+
+        // DanmakuLoaderFactory.create(DanmakuLoaderFactory.TAG_BILI) //xml解析
+        // DanmakuLoaderFactory.create(DanmakuLoaderFactory.TAG_ACFUN) //json文件格式解析
+        ILoader loader = DanmakuLoaderFactory.create(DanmakuLoaderFactory.TAG_BILI);
+
+        try {
+            loader.load(stream);
+        } catch (IllegalDataException e) {
+            e.printStackTrace();
+        }
+        BaseDanmakuParser parser = new BiliDanmukuParser();
+        IDataSource<?> dataSource = loader.getDataSource();
+        parser.load(dataSource);
+        return parser;
 
     }
 
@@ -138,6 +263,11 @@ public class PlayActivity extends AppCompatActivity implements IPlayerView {
         setSupportActionBar(toolbar);
 
         button = findViewById(R.id.play);
+        if (PlayUtil.player != null && !PlayUtil.player.isPlaying()) {
+            button.setBackgroundResource(R.drawable.ic_play_circle_filled_light_64dp);
+        } else {
+            button.setBackgroundResource(R.drawable.ic_pause_circle_filled_black_24dp);
+        }
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -151,6 +281,7 @@ public class PlayActivity extends AppCompatActivity implements IPlayerView {
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 if (b) {
                     PlayUtil.player.seekTo(i);
+                    danmakuView.seekTo((long)i);
                 }
             }
 
@@ -158,6 +289,7 @@ public class PlayActivity extends AppCompatActivity implements IPlayerView {
             public void onStartTrackingTouch(SeekBar seekBar) {
                 PlayUtil.player.pause();
                 PlayUtil.CURRENT_STATE = PlayUtil.PAUSE;
+                danmakuView.pause();
                 playerPresenter.start();
             }
 
@@ -177,7 +309,9 @@ public class PlayActivity extends AppCompatActivity implements IPlayerView {
             @Override
             public void onClick(View view) {
 //                PlayUtil.pause();
-                PlayUtil.player.seekTo(PlayUtil.player.getCurrentPosition() + 5000);
+                int currentMillis = PlayUtil.player.getCurrentPosition();
+                PlayUtil.player.seekTo(currentMillis + 5000);
+                danmakuView.seekTo((long)(currentMillis + 5000));
 //                Runnable runnable = new Runnable() {
 //                    @Override
 //                    public void run() {
@@ -191,7 +325,9 @@ public class PlayActivity extends AppCompatActivity implements IPlayerView {
             @Override
             public void onClick(View view) {
 //                PlayUtil.pause();
-                PlayUtil.player.seekTo(PlayUtil.player.getCurrentPosition() - 5000);
+                int currentMillis = PlayUtil.player.getCurrentPosition();
+                PlayUtil.player.seekTo(currentMillis - 5000);
+                danmakuView.seekTo((long)(currentMillis - 5000));
 //                Runnable runnable = new Runnable() {
 //                    @Override
 //                    public void run() {
@@ -237,8 +373,10 @@ public class PlayActivity extends AppCompatActivity implements IPlayerView {
             PlayUtil.startService(this, PlayUtil.currentMusic, PlayUtil.PLAY);
         } else if (PlayUtil.CURRENT_STATE == PlayUtil.PAUSE) {
             button.setBackgroundResource(R.drawable.ic_pause_circle_filled_black_24dp);
+            danmakuView.resume();
             PlayUtil.startService(this, PlayUtil.currentMusic, PlayUtil.PAUSE);
         } else {
+            danmakuView.pause();
             button.setBackgroundResource(R.drawable.ic_play_circle_filled_light_64dp);
             PlayUtil.startService(this, PlayUtil.currentMusic, PlayUtil.PAUSE);
         }
