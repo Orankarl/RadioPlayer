@@ -2,4 +2,5 @@
 <resources>
     <dimen name="lrcTextSize">24px</dimen>
     <dimen name="lrcHighlightTextSize">28px</dimen>
+    <dimen name="timeTextSize">20px</dimen>
 </resources>

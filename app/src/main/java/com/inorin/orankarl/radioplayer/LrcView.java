@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.media.MediaPlayer;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 import java.util.List;
@@ -88,6 +89,7 @@ public class LrcView extends View {
         hPaint.setTextAlign(Paint.Align.CENTER);
         hPaint.setFakeBoldText(true);
         hPaint.setShadowLayer(1, 2, 2, R.color.colorBlack);
+        Log.d("lrc text size", String.valueOf(getResources().getDimensionPixelSize(R.dimen.lrcTextSize)));
 
         //set up line height
         Paint.FontMetrics fontMetrics = gPaint.getFontMetrics();

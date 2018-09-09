@@ -301,7 +301,9 @@ public class PlayActivity extends AppCompatActivity implements IPlayerView {
         });
 
         currentTime = findViewById(R.id.current_time);
+//        currentTime.setTextSize(getResources().getDimensionPixelSize(R.dimen.timeTextSize));
         totalTime = findViewById(R.id.total_time);
+//        totalTime.setTextSize(getResources().getDimensionPixelSize(R.dimen.timeTextSize));
 
         forwardFive = findViewById(R.id.forward_5);
         replayFive = findViewById(R.id.replay_5);
@@ -360,7 +362,6 @@ public class PlayActivity extends AppCompatActivity implements IPlayerView {
         lrcView.setLrc(lrcStr);
         lrcView.setPlayer(PlayUtil.player);
         lrcView.init();
-        lrcView.setVisibility(View.GONE);
 
         singleLrcView.setLrc(lrcStr);
         singleLrcView.setPlayer(PlayUtil.player);
@@ -383,15 +384,15 @@ public class PlayActivity extends AppCompatActivity implements IPlayerView {
     }
 
     @Override
-    public boolean onSupportNavigateUp() {
-        onBackPressed();
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_play_toolbar, menu);
         return true;
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.activity_play_toolbar, menu);
-        return true;
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return super.onSupportNavigateUp();
     }
 
     @Override
@@ -407,9 +408,10 @@ public class PlayActivity extends AppCompatActivity implements IPlayerView {
             case R.id.info:
                 break;
             default:
+                Log.d("item id", String.valueOf(item.getItemId()));
                 break;
         }
-        return true;
+        return super.onOptionsItemSelected(item);
     }
 
     public void switchLRCView(View view) {

@@ -7,4 +7,5 @@
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="lrcTextSize">18px</dimen>
     <dimen name="lrcHighlightTextSize">21px</dimen>
+    <dimen name="timeTextSize">15px</dimen>
 </resources>
