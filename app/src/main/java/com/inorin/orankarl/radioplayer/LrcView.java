@@ -120,7 +120,7 @@ public class LrcView extends View {
         if (getScrollY() == currentPosition * lineHeight) {
             lastPosition = currentPosition;
         }
-        postInvalidateDelayed(16);
+        postInvalidateDelayed(50);
     }
 
     private void drawLrc2(Canvas canvas, int currentMillis) {

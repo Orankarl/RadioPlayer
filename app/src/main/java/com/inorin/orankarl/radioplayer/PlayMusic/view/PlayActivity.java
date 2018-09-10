@@ -6,6 +6,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -17,6 +18,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.support.constraint.ConstraintLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -82,6 +84,7 @@ public class PlayActivity extends AppCompatActivity implements IPlayerView {
     private HashMap<Integer, Integer> maxLinesPair;// 弹幕最大行数
     private HashMap<Integer, Boolean> overlappingEnablePair;// 设置是否重叠
     private BaseDanmakuParser parser;
+    private boolean isFirst = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,8 +94,12 @@ public class PlayActivity extends AppCompatActivity implements IPlayerView {
 
         initLrcLayout();
         initView();
-        if (getIntent().getBooleanExtra("isFirst", false)) {
+
+        isFirst = getIntent().getBooleanExtra("isFirst", false);
+
+        if (isFirst) {
             playOrPause(button);
+            isFirst = false;
         }
 
         initDanmakuView();
@@ -111,6 +118,8 @@ public class PlayActivity extends AppCompatActivity implements IPlayerView {
 
         BilibiliUtil util = new BilibiliUtil();
         util.init(6509075, this);
+
+//        Log.d("")
 
     }
 
@@ -172,9 +181,9 @@ public class PlayActivity extends AppCompatActivity implements IPlayerView {
                 @Override
                 public void prepared() {
                     danmakuView.start(PlayUtil.player.getCurrentPosition());
-                    if (PlayUtil.player != null && !PlayUtil.player.isPlaying()) {
-                        danmakuView.pause();
-                    }
+//                    if (PlayUtil.player != null && !PlayUtil.player.isPlaying()) {
+//                        danmakuView.pause();
+//                    }
                 }
             });
 
@@ -377,7 +386,10 @@ public class PlayActivity extends AppCompatActivity implements IPlayerView {
             danmakuView.resume();
             PlayUtil.startService(this, PlayUtil.currentMusic, PlayUtil.PAUSE);
         } else {
-            danmakuView.pause();
+            if (!isFirst) {
+                danmakuView.pause();
+            }
+//            danmakuView.pause();
             button.setBackgroundResource(R.drawable.ic_play_circle_filled_light_64dp);
             PlayUtil.startService(this, PlayUtil.currentMusic, PlayUtil.PAUSE);
         }
@@ -406,12 +418,26 @@ public class PlayActivity extends AppCompatActivity implements IPlayerView {
                 }
                 break;
             case R.id.info:
+                showInfoDialog();
                 break;
             default:
                 Log.d("item id", String.valueOf(item.getItemId()));
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showInfoDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Radio Info:")
+                .setMessage("字幕&音源：@兔子難民(Bilibili)\nB站视频：av6509075")
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                });
+        builder.show();
     }
 
     public void switchLRCView(View view) {

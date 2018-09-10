@@ -123,7 +123,7 @@ public class SingleLrcView extends View {
         }
 
 //        Log.d("current&last", String.valueOf(currentPosition) + " " + String.valueOf(lastPosition));
-        postInvalidateDelayed(16);
+        postInvalidateDelayed(50);
     }
 
     private void drawLrc2(Canvas canvas, int currentMillis) {

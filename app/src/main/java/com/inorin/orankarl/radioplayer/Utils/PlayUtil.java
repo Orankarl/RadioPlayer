@@ -34,7 +34,7 @@ public class PlayUtil {
 //                player.setDataSource(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "MyMusic" + File.separator + currentMusic.getSongid() + ".mp3");
 //            }
             AssetManager assetManager = context.getAssets();
-            AssetFileDescriptor descriptor = context.getAssets().openFd("Yumenotsubomi.mp3");
+            AssetFileDescriptor descriptor = context.getAssets().openFd("MMF1.mp3");
             player.setDataSource(descriptor.getFileDescriptor(), descriptor.getStartOffset(), descriptor.getLength());
             player.prepareAsync();
         } catch (IOException e) {

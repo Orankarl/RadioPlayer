@@ -11,7 +11,7 @@ public class PlayerData implements IPlayerData {
     public void loadLrc(int id, OnLrcLoadListener listener, Context context) {
         AssetManager assetManager = context.getAssets();
         try {
-            InputStream inputStream = assetManager.open("Yumenotsubomi.lrc");
+            InputStream inputStream = assetManager.open("MMF1.lrc");
             int count = 0;
             while(count == 0) {
                 count = inputStream.available();

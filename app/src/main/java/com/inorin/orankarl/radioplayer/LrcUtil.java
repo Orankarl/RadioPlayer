@@ -14,6 +14,8 @@ public class LrcUtil {
      * @param lrcStr
      * @return
      */
+    public static int charNumPerLine = 15;
+
     public static List<LrcBean> parseStr2List(String lrcStr) {
         List<LrcBean> list = new ArrayList<>();
         String lrcText = lrcStr.replaceAll("&#58;", ":")
@@ -46,12 +48,42 @@ public class LrcUtil {
                 }
             }
         }
+
         Collections.sort(list, new Comparator<LrcBean>() {
             @Override
             public int compare(LrcBean lrcBean, LrcBean t1) {
                 return Long.compare(lrcBean.getStart(), t1.getStart());
             }
         });
-        return list;
+
+        //Auto split a long line into several short line according to charNumPerLine
+        List<LrcBean> newList = new ArrayList<>();
+        for (int i = 0; i < list.size() - 1; i++) {
+            String string = list.get(i).getLrc();
+            if (string.length() < charNumPerLine) {
+                newList.add(list.get(i));
+                continue;
+            }
+            long startTime = list.get(i).getStart();
+            long nextStartTime = list.get(i+1).getStart();
+            long duration = nextStartTime - startTime;
+            long time = startTime;
+            int index = 0;
+            while(index < string.length()) {
+                int endIndex = Math.min(index + charNumPerLine, string.length());
+                if (endIndex + 1 < string.length() && string.charAt(endIndex+1) == ' ') endIndex++;
+                else if (endIndex - 2 > index && string.charAt(endIndex - 2) == ' ') endIndex--;
+                long endTime = (long) (time + 1.0 * (endIndex - index) / string.length() * duration);
+                String lrc = string.substring(index, endIndex);
+                if (lrc.charAt(0) == ' ') lrc = lrc.substring(1);
+                if (lrc.charAt(lrc.length() - 1) == ' ') lrc = lrc.substring(0, lrc.length()-1);
+                LrcBean bean = new LrcBean(lrc, time, endTime);
+                index = endIndex;
+                time = endTime;
+                newList.add(bean);
+            }
+        }
+
+        return newList;
     }
 }
